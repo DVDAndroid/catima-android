@@ -128,6 +128,9 @@ dependencies {
     implementation("com.jaredrummler:colorpicker:1.1.0")
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // SpotBugs
     implementation("io.wcm.tooling.spotbugs:io.wcm.tooling.spotbugs.annotations:1.0.0")
 

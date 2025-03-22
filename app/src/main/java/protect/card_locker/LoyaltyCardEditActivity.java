@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,6 +63,7 @@ import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.model.AspectRatio;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -82,10 +84,13 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.LayoutChipChoiceBinding;
 import protect.card_locker.databinding.LoyaltyCardEditActivityBinding;
+import protect.card_locker.sync.SyncUpsertCardCompatCallable;
+import protect.card_locker.sync.SyncCard;
 import protect.card_locker.viewmodels.LoyaltyCardEditActivityViewModel;
 
 public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements BarcodeImageWriterResultCallback, ColorPickerDialogListener {
@@ -1183,6 +1188,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
             if (currentImage != null && v.getId() != R.id.thumbnail) {
                 cardOptions.put(getString(R.string.removeImage), () -> {
                     setCardImage(imageLocationType, targetView, null, true);
+                    viewModel.setHasChanged(true); // BUGFIX
                     return null;
                 });
             }
@@ -1431,7 +1437,8 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
 
         boolean hasError = false;
 
-        if (viewModel.getLoyaltyCard().store.isEmpty()) {
+        LoyaltyCard lc = viewModel.getLoyaltyCard();
+        if (lc.store.isEmpty()) {
             storeFieldEdit.setError(getString(R.string.field_must_not_be_empty));
 
             // Focus element
@@ -1441,7 +1448,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
             hasError = true;
         }
 
-        if (viewModel.getLoyaltyCard().cardId.isEmpty()) {
+        if (lc.cardId.isEmpty()) {
             cardIdFieldView.setError(getString(R.string.field_must_not_be_empty));
 
             // Focus element if first error element
@@ -1478,20 +1485,44 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
         // This makes the DBHelper set it to the current date
         // So that new and edited card are always on top when sorting by recently used
         if (viewModel.getUpdateLoyaltyCard()) {
-            DBHelper.updateLoyaltyCard(mDatabase, viewModel.getLoyaltyCardId(), viewModel.getLoyaltyCard().store, viewModel.getLoyaltyCard().note, viewModel.getLoyaltyCard().validFrom, viewModel.getLoyaltyCard().expiry, viewModel.getLoyaltyCard().balance, viewModel.getLoyaltyCard().balanceType, viewModel.getLoyaltyCard().cardId, viewModel.getLoyaltyCard().barcodeId, viewModel.getLoyaltyCard().barcodeType, viewModel.getLoyaltyCard().headerColor, viewModel.getLoyaltyCard().starStatus, null, viewModel.getLoyaltyCard().archiveStatus);
+            DBHelper.updateLoyaltyCard(mDatabase, viewModel.getLoyaltyCardId(), lc.store, lc.note, lc.validFrom, lc.expiry, lc.balance, lc.balanceType, lc.cardId, lc.barcodeId, lc.barcodeType, lc.headerColor, lc.starStatus, null, lc.archiveStatus);
         } else {
-            viewModel.setLoyaltyCardId((int) DBHelper.insertLoyaltyCard(mDatabase, viewModel.getLoyaltyCard().store, viewModel.getLoyaltyCard().note, viewModel.getLoyaltyCard().validFrom, viewModel.getLoyaltyCard().expiry, viewModel.getLoyaltyCard().balance, viewModel.getLoyaltyCard().balanceType, viewModel.getLoyaltyCard().cardId, viewModel.getLoyaltyCard().barcodeId, viewModel.getLoyaltyCard().barcodeType, viewModel.getLoyaltyCard().headerColor, 0, null, 0));
+            viewModel.setLoyaltyCardId((int) DBHelper.insertLoyaltyCard(mDatabase, lc.store, lc.note, lc.validFrom, lc.expiry, lc.balance, lc.balanceType, lc.cardId, lc.barcodeId, lc.barcodeType, lc.headerColor, 0, null, 0));
         }
 
         try {
-            Utils.saveCardImage(this, viewModel.getLoyaltyCard().getImageFront(this), viewModel.getLoyaltyCardId(), ImageLocationType.front);
-            Utils.saveCardImage(this, viewModel.getLoyaltyCard().getImageBack(this), viewModel.getLoyaltyCardId(), ImageLocationType.back);
-            Utils.saveCardImage(this, viewModel.getLoyaltyCard().getImageThumbnail(this), viewModel.getLoyaltyCardId(), ImageLocationType.icon);
+            Utils.saveCardImage(this, lc.getImageFront(this), viewModel.getLoyaltyCardId(), ImageLocationType.front);
+            Utils.saveCardImage(this, lc.getImageBack(this), viewModel.getLoyaltyCardId(), ImageLocationType.back);
+            Utils.saveCardImage(this, lc.getImageThumbnail(this), viewModel.getLoyaltyCardId(), ImageLocationType.icon);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
         DBHelper.setLoyaltyCardGroups(mDatabase, viewModel.getLoyaltyCardId(), selectedGroups);
+
+        if (viewModel.getHasChanged()) {
+            SyncUpsertCardCompatCallable syncCard = new SyncUpsertCardCompatCallable(
+                    getApplicationContext(),
+                    new SyncCard(
+                            viewModel.getLoyaltyCardId(),
+                            lc.store,
+                            lc.note,
+                            lc.validFrom != null ? lc.validFrom.getTime() : null,
+                            lc.expiry != null ? lc.expiry.getTime() : null,
+                            lc.balance.toString(),
+                            lc.balanceType != null ? lc.balanceType.getCurrencyCode() : null,
+                            lc.cardId,
+                            lc.barcodeId,
+                            lc.barcodeType != null ? lc.barcodeType.name() : null,
+                            lc.headerColor,
+                            lc.starStatus,
+                            lc.archiveStatus,
+                            selectedGroups.stream().map((g) -> g._id).collect(Collectors.toUnmodifiableList()),
+                            bitmap2string(lc.getImageFront(this)),
+                            bitmap2string(lc.getImageBack(this))
+                    ));
+            viewModel.getTaskHandler().executeTask(TaskHandler.TYPE.SYNC, syncCard);
+        }
 
         ShortcutHelper.updateShortcuts(this, DBHelper.getLoyaltyCard(this, mDatabase, viewModel.getLoyaltyCardId()));
 
@@ -1690,5 +1721,15 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
     private String getCurrencySymbol(final Currency currency) {
         // Workaround for Android bug where the output of Currency.getSymbol() changes.
         return currencySymbols.get(currency.getCurrencyCode());
+    }
+
+    private String bitmap2string(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] b = baos.toByteArray();
+        return Base64.encodeToString(b, Base64.DEFAULT);
     }
 }

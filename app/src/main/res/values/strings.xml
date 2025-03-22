@@ -364,4 +364,10 @@
     <string name="addFromPkpass">Select a Passbook file (.pkpass)</string>
     <string name="unsupportedFile">This file is not supported</string>
     <string name="generic_error_please_retry">Sorry, something went wrong, please try again...</string>
+
+    <string name="sync">Sync</string>
+    <string name="sync_server_url">Sync server URL</string>
+    <string name="pref_sync_server_url" translatable="false">sync_server_url</string>
+    <string name="sync_lastsync">Last sync</string>
+    <string name="pref_sync_lastsync" translatable="false">pref_sync_lastsync</string>
 </resources>

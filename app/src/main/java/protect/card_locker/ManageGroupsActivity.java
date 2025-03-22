@@ -25,12 +25,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
+import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.ManageGroupsActivityBinding;
+import protect.card_locker.sync.SyncDeleteGroupCompatCallable;
+import protect.card_locker.sync.SyncGroup;
+import protect.card_locker.sync.SyncUpsertGroupCompatCallable;
 
 public class ManageGroupsActivity extends CatimaAppCompatActivity implements GroupCursorAdapter.GroupAdapterListener {
     private ManageGroupsActivityBinding binding;
     private static final String TAG = "Catima";
 
+    private TaskHandler taskHandler = new TaskHandler();
     private SQLiteDatabase mDatabase;
     private TextView mHelpText;
     private RecyclerView mGroupList;
@@ -134,8 +139,14 @@ public class ManageGroupsActivity extends CatimaAppCompatActivity implements Gro
 
         // Buttons
         builder.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
-            DBHelper.insertGroup(mDatabase, input.getText().toString().trim());
+            String name = input.getText().toString().trim();
+            DBHelper.insertGroup(mDatabase, name);
             updateGroupList();
+
+            taskHandler.executeTask(TaskHandler.TYPE.SYNC, new SyncUpsertGroupCompatCallable(
+                    getApplicationContext(),
+                    new SyncGroup(name, DBHelper.getGroupCount(mDatabase) - 1)
+            ));
         });
         builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.cancel());
         AlertDialog dialog = builder.create();
@@ -236,6 +247,11 @@ public class ManageGroupsActivity extends CatimaAppCompatActivity implements Gro
         builder.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
             DBHelper.deleteGroup(mDatabase, groupName);
             updateGroupList();
+            taskHandler.executeTask(TaskHandler.TYPE.SYNC, new SyncDeleteGroupCompatCallable(
+                    getApplicationContext(),
+                    groupName
+            ));
+
             // Delete may change ordering, so invalidate
             invalidateHomescreenActiveTab();
         });

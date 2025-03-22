@@ -67,6 +67,7 @@ import java.util.function.Predicate;
 import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.LoyaltyCardViewLayoutBinding;
 import protect.card_locker.preferences.Settings;
+import protect.card_locker.sync.SyncDeleteCardCompatCallable;
 
 public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements BarcodeImageWriterResultCallback {
     private LoyaltyCardViewLayoutBinding binding;
@@ -890,6 +891,11 @@ public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements 
                 Log.e(TAG, "Deleting card: " + loyaltyCardId);
 
                 DBHelper.deleteLoyaltyCard(database, LoyaltyCardViewActivity.this, loyaltyCardId);
+
+                mTasks.executeTask(TaskHandler.TYPE.SYNC, new SyncDeleteCardCompatCallable(
+                        getApplicationContext(),
+                        loyaltyCardId
+                ));
 
                 ShortcutHelper.removeShortcut(LoyaltyCardViewActivity.this, loyaltyCardId);
 

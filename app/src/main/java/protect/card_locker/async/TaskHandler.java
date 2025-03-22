@@ -25,7 +25,8 @@ public class TaskHandler {
     public enum TYPE {
         BARCODE,
         IMPORT,
-        EXPORT
+        EXPORT,
+        SYNC,
     }
 
     HashMap<TYPE, ThreadPoolExecutor> executors = generateExecutors();

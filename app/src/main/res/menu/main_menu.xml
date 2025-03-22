@@ -16,6 +16,12 @@
         app:showAsAction="always"
         android:visible="false"/>
     <item
+        android:id="@+id/action_sync"
+        android:title="@string/sync"
+        android:icon="@drawable/cloud_24"
+        app:showAsAction="always"
+        android:visible="false"/>
+    <item
         android:id="@+id/action_sort"
         android:title="@string/sort"
         android:icon="@drawable/ic_baseline_sort_24"

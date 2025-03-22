@@ -43,11 +43,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.ContentMainBinding;
 import protect.card_locker.databinding.MainActivityBinding;
 import protect.card_locker.databinding.SortingOptionBinding;
 import protect.card_locker.preferences.Settings;
 import protect.card_locker.preferences.SettingsActivity;
+import protect.card_locker.sync.SyncDeleteCardCompatCallable;
 
 public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCardCursorAdapter.CardAdapterListener {
     private MainActivityBinding binding;
@@ -58,6 +60,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
     private static final int MEDIUM_SCALE_FACTOR_DIP = 460;
     static final String STATE_SEARCH_QUERY = "SEARCH_QUERY";
 
+    private TaskHandler taskHandler = new TaskHandler();
     private SQLiteDatabase mDatabase;
     private LoyaltyCardCursorAdapter mAdapter;
     private ActionMode mCurrentActionMode;
@@ -135,6 +138,11 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
                         Log.d(TAG, "Deleting card: " + loyaltyCard.id);
 
                         DBHelper.deleteLoyaltyCard(mDatabase, MainActivity.this, loyaltyCard.id);
+
+                        taskHandler.executeTask(TaskHandler.TYPE.SYNC, new SyncDeleteCardCompatCallable(
+                                getApplicationContext(),
+                                loyaltyCard.id
+                        ));
 
                         ShortcutHelper.removeShortcut(MainActivity.this, loyaltyCard.id);
                     }

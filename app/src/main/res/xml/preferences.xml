@@ -47,6 +47,24 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/sync"
+        app:iconSpaceReserved="false">
+
+        <protect.card_locker.sync.SyncServerUrlPreference
+            android:key="@string/pref_sync_server_url"
+            android:title="@string/sync_server_url"
+            android:fragment="protect.card_locker.preferences.SettingsActivity$SettingsFragment"
+            app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="@string/pref_sync_lastsync"
+            android:title="@string/sync_lastsync"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/settings_category_title_cards_overview"
         app:iconSpaceReserved="false">
 

@@ -1,7 +1,9 @@
 package protect.card_locker.preferences;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -14,6 +16,7 @@ import androidx.core.os.LocaleListCompat;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.color.DynamicColors;
 
@@ -104,6 +107,10 @@ public class SettingsActivity extends CatimaAppCompatActivity {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences);
 
+            Context context = this.getContext();
+            assert context != null;
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
             // Show pretty names and summaries
             ListPreference themePreference = findPreference(getResources().getString(R.string.settings_key_theme));
             assert themePreference != null;
@@ -118,6 +125,12 @@ public class SettingsActivity extends CatimaAppCompatActivity {
 
                 return true;
             });
+
+            String serverUrlPrefKey = getResources().getString(R.string.pref_sync_server_url);
+            String serverUrl = prefs.getString(serverUrlPrefKey, "");
+            Preference serverUrlPref = findPreference(serverUrlPrefKey);
+            assert serverUrlPref != null;
+            serverUrlPref.setEnabled(!serverUrl.isEmpty());
 
             ListPreference themeColorPreference = findPreference(getResources().getString(R.string.setting_key_theme_color));
             assert themeColorPreference != null;
