@@ -442,7 +442,13 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(LoyaltyCardDbIds.STAR_STATUS, starStatus);
         contentValues.put(LoyaltyCardDbIds.LAST_USED, lastUsed != null ? lastUsed : Utils.getUnixTime());
         contentValues.put(LoyaltyCardDbIds.ARCHIVE_STATUS, archiveStatus);
-        database.insert(LoyaltyCardDbIds.TABLE, null, contentValues);
+        long out = database.insert(LoyaltyCardDbIds.TABLE, null, contentValues);
+
+        if (out == -1) {
+            database.setTransactionSuccessful();
+            database.endTransaction();
+            return -1;
+        }
 
         // FTS
         insertFTS(database, id, store, note);

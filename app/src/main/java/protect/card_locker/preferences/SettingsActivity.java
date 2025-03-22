@@ -31,7 +31,9 @@ import protect.card_locker.CatimaAppCompatActivity;
 import protect.card_locker.MainActivity;
 import protect.card_locker.R;
 import protect.card_locker.Utils;
+import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.SettingsActivityBinding;
+import protect.card_locker.sync.SyncDownloadCompatCallable;
 
 public class SettingsActivity extends CatimaAppCompatActivity {
 
@@ -99,6 +101,7 @@ public class SettingsActivity extends CatimaAppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         private static final String DIALOG_FRAGMENT_TAG = "SettingsFragment";
+        private TaskHandler taskHandler = new TaskHandler();
 
         public boolean mReloadMain;
 
@@ -128,9 +131,14 @@ public class SettingsActivity extends CatimaAppCompatActivity {
 
             String serverUrlPrefKey = getResources().getString(R.string.pref_sync_server_url);
             String serverUrl = prefs.getString(serverUrlPrefKey, "");
-            Preference serverUrlPref = findPreference(serverUrlPrefKey);
-            assert serverUrlPref != null;
-            serverUrlPref.setEnabled(!serverUrl.isEmpty());
+
+            Preference syncPref = findPreference(getResources().getString(R.string.pref_sync_lastsync));
+            assert syncPref != null;
+            syncPref.setEnabled(!serverUrl.isEmpty());
+            syncPref.setOnPreferenceClickListener((p) -> {
+                onSync();
+                return true;
+            });
 
             ListPreference themeColorPreference = findPreference(getResources().getString(R.string.setting_key_theme_color));
             assert themeColorPreference != null;
@@ -213,6 +221,10 @@ public class SettingsActivity extends CatimaAppCompatActivity {
             if (activity != null) {
                 activity.recreate();
             }
+        }
+
+        private void onSync() {
+            taskHandler.executeTask(TaskHandler.TYPE.SYNC, new SyncDownloadCompatCallable(getContext()));
         }
     }
 }

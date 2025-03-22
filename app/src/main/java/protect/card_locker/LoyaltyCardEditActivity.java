@@ -1519,7 +1519,8 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
                             lc.archiveStatus,
                             selectedGroups.stream().map((g) -> g._id).collect(Collectors.toUnmodifiableList()),
                             bitmap2string(lc.getImageFront(this)),
-                            bitmap2string(lc.getImageBack(this))
+                            bitmap2string(lc.getImageBack(this)),
+                            bitmap2string(lc.getImageThumbnail(this))
                     ));
             viewModel.getTaskHandler().executeTask(TaskHandler.TYPE.SYNC, syncCard);
         }
