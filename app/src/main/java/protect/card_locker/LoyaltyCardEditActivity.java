@@ -120,7 +120,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
 
     ImageView thumbnail;
     ImageView thumbnailEditIcon;
-    EditText storeFieldEdit;
+    AutoCompleteTextView storeFieldEdit;
     EditText noteFieldEdit;
     ChipGroup groupsChips;
     AutoCompleteTextView validFromField;
@@ -345,6 +345,15 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
         cardImageBack = binding.backImage;
 
         enterButton = binding.enterButton;
+
+        List<Store> stores = DBHelper.getStores(mDatabase);
+        StoreAutocompleteAdapter storeAutocompleteAdapter = new StoreAutocompleteAdapter(this, stores);
+        storeFieldEdit.setAdapter(storeAutocompleteAdapter);
+
+        storeFieldEdit.setOnItemClickListener((parent, view, position, id) -> {
+            Store s = storeAutocompleteAdapter.getItem(position);
+            setThumbnailImage(s.getLogoBitmap());
+        });
 
         storeFieldEdit.addTextChangedListener(new SimpleTextWatcher() {
             @Override
@@ -882,7 +891,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
 
             setLoyaltyCardHeaderColor(headerColor);
 
-            thumbnail.setBackgroundColor(Utils.needsDarkForeground(headerColor) ? Color.BLACK : Color.WHITE);
+            thumbnail.setBackgroundColor(headerColor);
 
             thumbnailEditIcon.setBackgroundColor(Utils.needsDarkForeground(headerColor) ? Color.BLACK : Color.WHITE);
             thumbnailEditIcon.setColorFilter(Utils.needsDarkForeground(headerColor) ? Color.WHITE : Color.BLACK);

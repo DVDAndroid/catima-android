@@ -998,8 +998,7 @@ public class Utils {
         backgroundOrIcon.setImageBitmap(icon);
 
         if (icon != null) {
-            // Use header colour to decide if this image will need a white or black background
-            backgroundOrIcon.setBackgroundColor(needsDarkForeground(headerColor) ? Color.BLACK : Color.WHITE);
+            backgroundOrIcon.setBackgroundColor(headerColor);
 
             textWhenNoImage.setVisibility(View.GONE);
         } else {

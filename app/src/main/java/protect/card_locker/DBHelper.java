@@ -897,6 +897,28 @@ public class DBHelper extends SQLiteOpenHelper {
                 whereAttrs(LoyaltyCardDbIdsGroups.groupID), withArgs(groupName));
     }
 
+    public static List<Store> getStores(SQLiteDatabase database, String... regions) {
+        Cursor data = database.query("stores", new String[]{"name", "logo"},
+                null, null, null, null, null);
+
+        List<Store> stores = new ArrayList<>();
+
+        if (!data.moveToFirst()) {
+            data.close();
+            return stores;
+        }
+
+        stores.add(Store.toStore(data));
+
+        while (data.moveToNext()) {
+            stores.add(Store.toStore(data));
+        }
+
+        data.close();
+
+        return stores;
+    }
+
     static private String whereAttrs(String... attrs) {
         if (attrs.length == 0) {
             return null;

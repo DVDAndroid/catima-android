@@ -139,7 +139,7 @@ class ShortcutHelper {
         if (iconBitmap == null) {
             iconBitmap = Utils.generateIcon(context, loyaltyCard, true).getLetterTile();
         } else {
-            iconBitmap = createAdaptiveBitmap(iconBitmap, Utils.needsDarkForeground(Utils.getHeaderColor(context, loyaltyCard)) ? Color.BLACK : Color.WHITE);
+            iconBitmap = createAdaptiveBitmap(iconBitmap, Utils.getHeaderColor(context, loyaltyCard));
         }
 
         IconCompat icon = IconCompat.createWithAdaptiveBitmap(iconBitmap);
