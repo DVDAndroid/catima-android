@@ -2,10 +2,12 @@ package protect.card_locker;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -85,6 +87,12 @@ public class SyncActivity extends CatimaAppCompatActivity {
                 serverUrlInputLayout.setError(getString(R.string.sync_server_url_error));
                 return;
             }
+            View view = this.getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+
             prefs.edit().putString(getString(R.string.pref_sync_server_url), url).apply();
 
             mTasks.executeTask(TaskHandler.TYPE.SYNC, new CompatCallable<ApiResponse>() {

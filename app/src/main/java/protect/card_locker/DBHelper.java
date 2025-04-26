@@ -468,7 +468,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(LoyaltyCardDbIds.STAR_STATUS, starStatus);
         contentValues.put(LoyaltyCardDbIds.LAST_USED, lastUsed != null ? lastUsed : Utils.getUnixTime());
         contentValues.put(LoyaltyCardDbIds.ARCHIVE_STATUS, archiveStatus);
-        long out = database.insert(LoyaltyCardDbIds.TABLE, null, contentValues);
+        long out = database.insertWithOnConflict(LoyaltyCardDbIds.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
 
         if (out == -1) {
             database.setTransactionSuccessful();
