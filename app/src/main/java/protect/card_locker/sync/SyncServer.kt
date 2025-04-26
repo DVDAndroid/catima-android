@@ -30,6 +30,7 @@ class SyncServer(val context: Context) {
         private const val CARDS_ENDPOINT = "/api/cards"
         private const val GROUP_ENDPOINT = "/api/group"
         private const val GROUPS_ENDPOINT = "/api/groups"
+        private const val STORE_METADATA_ENDPOINT = "/api/stores"
 
         fun reach(url: String): ApiResponse {
             try {
@@ -126,6 +127,25 @@ class SyncServer(val context: Context) {
             }
         }
 
+    }
+
+    fun downloadStoreMetadata(region: String) {
+        if (serverUrl == null) return
+
+        val reach = reach(serverUrl)
+        if (!reach.ok) return
+        val db = DBHelper(context).writableDatabase
+
+        val metadataRequest = Request.Builder()
+            .url("$serverUrl$STORE_METADATA_ENDPOINT?regions=$region")
+            .build()
+        val metadataResponse = client.newCall(metadataRequest).execute()
+        val metadataBody = metadataResponse.body?.string() ?: return
+        val metadata = Gson().fromJson(metadataBody, Array<SyncStoreMetadata>::class.java)
+
+        for (m in metadata) {
+            DBHelper.insertStoreMetadata(db, m)
+        }
     }
 
     fun upsertCard(card: SyncCard) = request(card, CARD_ENDPOINT, method = "POST")

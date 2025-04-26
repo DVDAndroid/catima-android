@@ -739,6 +739,12 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
             return true;
         }
 
+        if (id == R.id.action_sync) {
+            Intent i = new Intent(getApplicationContext(), SyncActivity.class);
+            startActivity(i);
+            return true;
+        }
+
         if (id == R.id.action_settings) {
             Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
             mSettingsLauncher.launch(i);

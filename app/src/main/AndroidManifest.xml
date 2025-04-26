@@ -168,6 +168,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SyncActivity"
+            android:label="@string/sync"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".CardShortcutConfigure"
             android:exported="true"
             android:label="@string/cardShortcut"

@@ -3,7 +3,6 @@ package protect.card_locker.preferences;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -16,7 +15,6 @@ import androidx.core.os.LocaleListCompat;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.material.color.DynamicColors;
 
@@ -33,7 +31,6 @@ import protect.card_locker.R;
 import protect.card_locker.Utils;
 import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.SettingsActivityBinding;
-import protect.card_locker.sync.SyncDownloadCompatCallable;
 
 public class SettingsActivity extends CatimaAppCompatActivity {
 
@@ -112,7 +109,6 @@ public class SettingsActivity extends CatimaAppCompatActivity {
 
             Context context = this.getContext();
             assert context != null;
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
             // Show pretty names and summaries
             ListPreference themePreference = findPreference(getResources().getString(R.string.settings_key_theme));
@@ -126,17 +122,6 @@ public class SettingsActivity extends CatimaAppCompatActivity {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                 }
 
-                return true;
-            });
-
-            String serverUrlPrefKey = getResources().getString(R.string.pref_sync_server_url);
-            String serverUrl = prefs.getString(serverUrlPrefKey, "");
-
-            Preference syncPref = findPreference(getResources().getString(R.string.pref_sync_lastsync));
-            assert syncPref != null;
-            syncPref.setEnabled(!serverUrl.isEmpty());
-            syncPref.setOnPreferenceClickListener((p) -> {
-                onSync();
                 return true;
             });
 
@@ -223,8 +208,5 @@ public class SettingsActivity extends CatimaAppCompatActivity {
             }
         }
 
-        private void onSync() {
-            taskHandler.executeTask(TaskHandler.TYPE.SYNC, new SyncDownloadCompatCallable(getContext()));
-        }
     }
 }

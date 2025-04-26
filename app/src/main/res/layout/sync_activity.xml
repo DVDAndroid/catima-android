@@ -18,13 +18,12 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabConnect"
+        android:id="@+id/fabSync"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:contentDescription="@string/save"
-        app:srcCompat="@drawable/settings_ethernet_24" />
+        app:srcCompat="@drawable/cloud_24" />
 
     <LinearLayout
         android:id="@+id/container"
@@ -51,6 +50,20 @@
                 android:singleLine="true" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/connectButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="@string/sync_connect" />
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/lastSync" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

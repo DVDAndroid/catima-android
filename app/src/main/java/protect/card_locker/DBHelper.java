@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import protect.card_locker.sync.SyncStoreMetadata;
+
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Catima.db";
     public static final int ORIGINAL_DATABASE_VERSION = 1;
@@ -133,6 +135,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE VIRTUAL TABLE " + LoyaltyCardDbFTS.TABLE + " USING fts4(" +
                 LoyaltyCardDbFTS.STORE + ", " + LoyaltyCardDbFTS.NOTE + ", " +
                 "tokenize=unicode61);");
+
+        db.execSQL("CREATE TABLE " + StoreMetadata.TABLE + "(" +
+                StoreMetadata.ID + " TEXT PRIMARY KEY,\n" +
+                StoreMetadata.NAME + " TEXT NOT NULL,\n" +
+                StoreMetadata.REGIONS + " TEXT NOT NULL,\n" +
+                StoreMetadata.LOGO + " BLOB\n" +
+                ")");
     }
 
     @Override
@@ -915,7 +924,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public static List<Store> getStores(SQLiteDatabase database, String... regions) {
-        Cursor data = database.query("stores", new String[]{"name", "logo"},
+        Cursor data = database.query(StoreMetadata.TABLE, new String[]{StoreMetadata.NAME, StoreMetadata.LOGO, },
                 null, null, null, null, null);
 
         List<Store> stores = new ArrayList<>();
@@ -934,6 +943,16 @@ public class DBHelper extends SQLiteOpenHelper {
         data.close();
 
         return stores;
+    }
+
+    public static void insertStoreMetadata(SQLiteDatabase db, SyncStoreMetadata m) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(StoreMetadata.ID, m.getId());
+        contentValues.put(StoreMetadata.NAME, m.getName());
+        contentValues.put(StoreMetadata.REGIONS, m.getRegions());
+        contentValues.put(StoreMetadata.LOGO, m.logoByteArray());
+
+        db.insertWithOnConflict(StoreMetadata.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     static private String whereAttrs(String... attrs) {
