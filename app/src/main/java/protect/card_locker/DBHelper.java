@@ -23,7 +23,7 @@ import java.util.Set;
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Catima.db";
     public static final int ORIGINAL_DATABASE_VERSION = 1;
-    public static final int DATABASE_VERSION = 16;
+    public static final int DATABASE_VERSION = 17;
 
     // NB: changing this value requires a migration
     public static final int DEFAULT_ZOOM_LEVEL = 100;
@@ -65,6 +65,14 @@ public class DBHelper extends SQLiteOpenHelper {
         public static final String ID = "rowid"; // This should NEVER be changed
         public static final String STORE = "store";
         public static final String NOTE = "note";
+    }
+
+    public static class StoreMetadata {
+        public static final String TABLE = "stores";
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static final String REGIONS = "regions";
+        public static final String LOGO = "logo";
     }
 
     public enum LoyaltyCardOrder {
@@ -326,6 +334,15 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < 16 && newVersion >= 16) {
             db.execSQL("ALTER TABLE " + LoyaltyCardDbIds.TABLE
                     + " ADD COLUMN " + LoyaltyCardDbIds.VALID_FROM + " INTEGER");
+        }
+
+        if (oldVersion < 17 && newVersion >= 17) {
+            db.execSQL("CREATE TABLE " + StoreMetadata.TABLE + "(" +
+                    StoreMetadata.ID + " TEXT PRIMARY KEY,\n" +
+                    StoreMetadata.NAME + " TEXT NOT NULL,\n" +
+                    StoreMetadata.REGIONS + " TEXT NOT NULL,\n" +
+                    StoreMetadata.LOGO + " BLOB\n" +
+                    ")");
         }
     }
 
